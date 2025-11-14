@@ -20,25 +20,15 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const formData = new URLSearchParams();
-      formData.append("username", email);
-      formData.append("password", password);
-
-      const response = await fetch("http://localhost:8000/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
+      // Mock authentication - accept demo credentials
+      if (email === "manager@pharmacy.com" && password === "demo123") {
+        // Store mock token
+        localStorage.setItem("token", "mock-jwt-token");
+        localStorage.setItem("user", JSON.stringify({ email, role: "manager" }));
+        navigate("/dashboard");
+      } else {
         throw new Error("Invalid credentials");
       }
-
-      const data = await response.json();
-      localStorage.setItem("token", data.access_token);
-      navigate("/dashboard");
     } catch (err) {
       setError("Invalid email or password. Please try again.");
     } finally {

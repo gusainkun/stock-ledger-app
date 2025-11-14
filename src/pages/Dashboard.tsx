@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, ShoppingCart, Database, TrendingUp, Shield, Activity } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { mockMedicines } from "@/data/mockMedicines";
+import { InventoryTable } from "@/components/InventoryTable";
+import { SalesRecordCard } from "@/components/SalesRecordCard";
 
 interface Stats {
   totalIncoming: number;
@@ -19,44 +22,13 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    // Fetch dashboard statistics
-    const fetchStats = async () => {
-      const token = localStorage.getItem("token");
-      
-      try {
-        // Fetch all data in parallel
-        const [incomingRes, salesRes, inventoryRes, ledgerRes] = await Promise.all([
-          fetch("http://localhost:8000/api/incoming", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch("http://localhost:8000/api/sales", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch("http://localhost:8000/api/inventory", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch("http://localhost:8000/api/ledger", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
-
-        const incoming = await incomingRes.json();
-        const sales = await salesRes.json();
-        const inventory = await inventoryRes.json();
-        const ledger = await ledgerRes.json();
-
-        setStats({
-          totalIncoming: Array.isArray(incoming) ? incoming.length : 0,
-          totalSales: Array.isArray(sales) ? sales.length : 0,
-          inventoryItems: Array.isArray(inventory) ? inventory.length : 0,
-          blockchainRecords: Array.isArray(ledger) ? ledger.length : 0,
-        });
-      } catch (error) {
-        console.error("Error fetching stats:", error);
-      }
-    };
-
-    fetchStats();
+    // Use mock data for statistics
+    setStats({
+      totalIncoming: 12,
+      totalSales: mockMedicines.reduce((sum, med) => sum + med.sales, 0),
+      inventoryItems: mockMedicines.length,
+      blockchainRecords: 45,
+    });
   }, []);
 
   const statCards = [
@@ -119,73 +91,9 @@ const Dashboard = () => {
           ))}
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-primary" />
-                System Status
-              </CardTitle>
-              <CardDescription>Current system health and performance</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Database Connection</span>
-                <span className="flex items-center gap-2 text-sm text-accent">
-                  <span className="h-2 w-2 rounded-full bg-accent animate-pulse-glow" />
-                  Active
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Blockchain Network</span>
-                <span className="flex items-center gap-2 text-sm text-accent">
-                  <span className="h-2 w-2 rounded-full bg-accent animate-pulse-glow" />
-                  Connected
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">API Services</span>
-                <span className="flex items-center gap-2 text-sm text-accent">
-                  <span className="h-2 w-2 rounded-full bg-accent animate-pulse-glow" />
-                  Operational
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+        <SalesRecordCard medicines={mockMedicines} />
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                Quick Actions
-              </CardTitle>
-              <CardDescription>Common tasks and operations</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <a
-                href="/incoming"
-                className="block p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-              >
-                <p className="font-medium text-sm">Add Incoming Stock</p>
-                <p className="text-xs text-muted-foreground">Record new medicine arrivals</p>
-              </a>
-              <a
-                href="/sales"
-                className="block p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-              >
-                <p className="font-medium text-sm">Record Sale</p>
-                <p className="text-xs text-muted-foreground">Process new transactions</p>
-              </a>
-              <a
-                href="/verify"
-                className="block p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-              >
-                <p className="font-medium text-sm">Verify Transaction</p>
-                <p className="text-xs text-muted-foreground">Check blockchain records</p>
-              </a>
-            </CardContent>
-          </Card>
-        </div>
+        <InventoryTable medicines={mockMedicines} />
       </div>
     </DashboardLayout>
   );
